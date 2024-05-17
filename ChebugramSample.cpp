@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-#include <string>
 #include <sstream>
 #include <locale>
 #include <codecvt>
@@ -105,29 +104,35 @@ void read_words_from_file(const std::string& filename, std::vector<std::string>&
 }
 
 
-
-std::vector<std::string> all_words;
-std::vector<std::string> banned_words = { "chebugram", "I", "apple", "working"};
-std::vector<std::string> banned_words_test = { "chebugram", "I", "apple", "working"};
-
-
-//banned_word
-
 class Banned_Words
 {
+//private:
 public:
     int word_index;
     std::string banned_word;
     std::string author_word; // Who add this word
+    std::string comment;
     time_t time_added;
 
-    Banned_Words() {
+    Banned_Words(int index, std::string word, std::string add_comment = "")
+    {
         word_index = 1;
         banned_word = "working";
         author_word = "System";
         time_added = time(nullptr);
-        std::cout << "Class created...\n";
+        comment = add_comment;
+        std::cout << "Class created with parameters...\n";
     }
+
+    Banned_Words() {
+        word_index = 0;
+        banned_word = "";
+        author_word = "System";
+        time_added = time(nullptr);
+        std::cout << "Dafault const...\n";
+    }
+    
+
     void Add_Word(std::string text)
     {
         banned_word = text;
@@ -135,47 +140,60 @@ public:
     }
     void Add_Word()
     {
-        word_index = 1;
-        banned_word = "working";
-        author_word = "System";
-        time_added = time(nullptr);
-        std::cout << "Succes?\n";
+        std::cout << "Default func\n";
+    }
+
+    void Print_word()
+    {
+        std::cout << word_index;
+        std::cout << banned_word;
+        std::cout << author_word;
+        std::cout << time_added;
+        std::cout << comment;
     }
 };
 
+//Banned_Words obj = Banned_Words();
+//Banned_Words* obj1 = new Banned_Words(1, "word", "author");
+//Banned_Words obj2 = Banned_Words(1, "word", "by MooDuckChe");
+//Banned_Words** obj4 = new Banned_Words * [5];
 
-//std::vector<std::vector<std::vector<
 
 
 
-void Main_Menu()
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////         DataBase        /////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+std::vector<std::string> all_words;
+std::vector<std::string> banned_words = { "chebugram", "I", "apple", "working"};
+std::vector<std::pair<std::string, std::string>> database_user = {
+    {"MooDuckChe", "1234"},
+    {"Aviron",     "5678"},
+    {"def4oult",   "7890"}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Initzialization_Banned_Word()
 {
-    std::vector<std::string> menu_str = {
-        "[1] Print all words.",
-        "[2] Print banned words.",
-        "[3] Print banned word index",
-        "[4] Print added banned words", // Who when what
-        "[5] Print deleted words\n",
+    int n = 5; // размер массива
 
-        "[6] Add new block word.",
-        "[7] Delete block word.",
-        "[8] Count block words.\n",
-        
-        "[0] Exit"
+    // Создание динамического массива указателей на объекты класса Banned_Words
+    Banned_Words** obj_array = new Banned_Words * [n];
 
-    };
-    for (int i = 0; i < menu_str.size(); i++)
-        std::cout << menu_str[i] << std::endl;
-    for (int i = 0; i < 7; i++)
-        std::cout << std::endl;
-    std::cout << "Select #";
+    // Выделение памяти для каждого объекта класса Banned_Words и инициализация его параметрами
+    for (int i = 0; i < n; i++)
+    {
+        obj_array[i] = new Banned_Words(i + 1, banned_words[i]);
+        Sleep(1000);
+    }
 }
 
 void Add_new_block_word(std::string word)
 {
-    Banned_Words obj = Banned_Words();
+    //Banned_Words obj = Banned_Words();
 
-    obj.Add_Word(word);
+    //obj.Add_Word(word);
 
     //banned_words.push_back(word);
 }
@@ -192,9 +210,8 @@ void Out_String(std::vector<std::string> text)
 void Print_banned_words()
 {
     for (int i = 0; i < banned_words.size(); i++)
-        std::cout << "[" << i+1 << "]" << banned_words[i];
+        std::cout << "[" << i + 1 << "]" << banned_words[i] << std::endl;
 }
-
 
 int Check_String_On_Banned_Word(std::vector<std::string> message, long long int message_id)
 {
@@ -233,8 +250,108 @@ std::vector<std::string> Separate_and_clear_space_message(std::string& message)
     return message_separated;
 }
 
+void Main_Menu()
+{
+    std::vector<std::string> menu_str = {
+        "[1] Print all words.",
+        "[2] Print banned words.",
+        "[3] Print banned word index (need fix)",
+        "[4] Print added banned words (need fix)", // Who when what
+        "[5] Print deleted words (need fix)\n",
 
+        "[6] Add new block word. (need fix)",
+        "[7] Delete block word. (need fix)",
+        "[8] Count block words. (need fix)\n",
+        
+        "[0] Exit"
 
+    };
+    for (int i = 0; i < menu_str.size(); i++)
+        std::cout << menu_str[i] << std::endl;
+    for (int i = 0; i < 7; i++)
+        std::cout << std::endl;
+    std::cout << "Select #";
+}
+
+bool Valid_Data(std::string user, std::string password)
+{
+    for (int i = 0; i < database_user.size(); i++)
+        if (database_user[i].first == user && database_user[i].second == password)
+            return true;
+    return false;
+}
+
+bool Verification(std::string user, std::string password)
+{
+    // bool admin = true/false
+    return (Valid_Data(user, password) ? true : false);
+}
+
+void Switch(int choose, int& delay, bool& flag, std::string& send_string)
+{
+    // Switch user
+    // Add user
+    switch (choose)
+    {
+        // Print all words
+    case 1:
+    {
+        Out_String(all_words);
+        break;
+    }
+    // Print banned words.
+    case 2:
+    {
+        Print_banned_words();
+        break;
+    }
+    // Print banned word index
+    case 3:
+    {
+        break;
+    }
+    // Print added banned words
+    case 4:
+    {
+        break;
+    }
+    // Print deleted words
+    case 5:
+    {
+        break;
+    }
+    // Add new baned word
+    case 6:
+    {
+        std::cout << "Введите слово: ";
+        std::string new_word;
+        std::cin >> new_word;
+        std::cout << "Вы добавили слово: " << new_word << std::endl;
+        Add_new_block_word(new_word);
+        break;
+    }
+    // Delete word
+    case 7:
+    {
+        break;
+    }
+    // Count banned word
+    case 8:
+    {
+        std::vector<std::string> message = Separate_and_clear_space_message(*&send_string);
+        Check_String_On_Banned_Word(*&message, 20132148124);
+        break;
+    }
+    case 0:
+    {
+        flag = false;
+        std::cout << "\nExiting";
+        for (int i = 0; i < 3; std::cout << '.', Sleep(200), i++);
+        delay = 0;
+        break;
+    }
+    }
+}
 
 int main()
 {
@@ -245,16 +362,23 @@ int main()
     system("chcp 1251 > nul");
 
     const std::string all_words_file = "sample.txt";
-
     read_words_from_file(all_words_file, all_words);
-
-    
 
     std::string send_string = "I am working on chebugram with many space            and space between";
 
-    std::string* ptr_send_string = &send_string;
+    std::string user, password;
+    std::cout << "User: ";
+    std::cin >> user;
+    std::cout << "Password: ";
+    std::cin >> password;
+    system("cls");
 
-    std::cout << std::endl;
+    if (!(Verification(user, password)))
+    {
+        std::cout << "Invalid user or password";
+        return 0;
+    }
+    
     int choose = 0;
     bool flag = true;
     int delay = 3000;
@@ -262,68 +386,9 @@ int main()
     {
         Main_Menu();
         std::cin >> choose;
-        switch (choose)
-        {
-        // Print all words
-        case 1:
-        {
-            Out_String(all_words);
-            break;
-        }
-        // Print banned words.
-        case 2:
-        {
-            Print_banned_words();
-            break;
-        }
-        // Print banned word index
-        case 3:
-        {
-            break;
-        }
-        // Print added banned words
-        case 4:
-        {
-            break;
-        }
-        // Print deleted words
-        case 5:
-        {
-            break;
-        }
-        // Add new baned word
-        case 6:
-        {
-            std::cout << "Введите слово: ";
-            std::string new_word;
-            std::cin >> new_word;
-            std::cout << "Вы добавили слово: " << new_word << std::endl;
-            Add_new_block_word(new_word);
-            break;
-        }
-        // Delete word
-        case 7:
-        {
-            break;
-        }
-        // Count banned word
-        case 8:
-        {
-            std::vector<std::string> message = Separate_and_clear_space_message(*&send_string);
-            Check_String_On_Banned_Word(*&message, 20132148124);
-            break;
-        }
-        case 0:
-        {
-            flag = false;
-            std::cout << "\nExiting";
-            for (int i = 0; i < 3; std::cout << '.', Sleep(200), i++);
-            delay = 0;
-            break;
-        }
-        }
+        Switch(choose, *&delay, *&flag, *&send_string);
         Sleep(delay);
-        for (int i = 0; i < 30; std::cout << std::endl, i++);
+        system("cls");
     }
     return 0;
 }
